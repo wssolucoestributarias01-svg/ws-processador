@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Processador Fiscal · WS Soluções Tributárias</title>
+<title>Portal Fiscal · WS Soluções Tributárias</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -50,7 +50,12 @@
   .top .who{font-size:12px;color:#c9d5ea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
   .top .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
   #frameWrap{flex:1;position:relative;background:#0f0f0f}
-  #frame{position:absolute;inset:0;width:100%;height:100%;border:0}
+  #frameWrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .systabs{display:flex;gap:4px;margin-left:14px}
+  .systab{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#c9d5ea;font-size:12.5px;font-weight:600;cursor:pointer}
+  .systab.on{background:var(--gold);border-color:var(--gold);color:#1a1a1a}
+  .grp{margin-bottom:8px}.grp b{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+  .chip.all{border-style:dashed}
   #frameMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--muted);text-align:center;padding:24px}
 
   /* admin */
@@ -97,8 +102,8 @@
 <div id="scrLogin" class="scr hidden">
   <div class="card">
     <div class="mark">WS</div>
-    <h1>Processador Fiscal</h1>
-    <div class="sub">WS Soluções Tributárias</div>
+    <h1>Portal Fiscal WS</h1>
+    <div class="sub">Processador Fiscal · SPED Manager</div>
     <p>Acesso restrito a usuários autorizados. Entre com a sua conta Google.</p>
     <button class="btn primary" id="btnLogin">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
@@ -114,7 +119,7 @@
   <div class="card">
     <div class="mark">WS</div>
     <h1>Acesso não liberado</h1>
-    <div class="sub">Processador Fiscal</div>
+    <div class="sub">Portal Fiscal WS</div>
     <p id="deniedTxt"></p>
     <button class="btn" id="btnLogout2">Sair e usar outra conta</button>
   </div>
@@ -124,14 +129,14 @@
 <div id="app" class="hidden">
   <div class="top">
     <div class="mark sm">WS</div>
-    <div class="t">Processador Fiscal<span id="verTxt"></span></div>
+    <div class="t">Portal WS<span id="verTxt"></span></div>
+    <div class="systabs" id="sysTabs"></div>
     <div class="sp"></div>
     <div class="who" id="whoTxt"></div>
     <button class="btn sm hidden" id="btnAdmin">⚙ Admin</button>
     <button class="btn sm" id="btnLogout">Sair</button>
   </div>
   <div id="frameWrap">
-    <iframe id="frame" title="Processador Fiscal" allow="clipboard-write"></iframe>
     <div id="frameMsg" class="hidden"></div>
   </div>
 
@@ -143,7 +148,7 @@
         <button class="tab" data-tab="versao">Publicar versão</button>
         <button class="tab" data-tab="acessos">Acessos</button>
         <div style="flex:1"></div>
-        <button class="btn sm" id="btnFecharAdmin" style="align-self:center">✕ Voltar ao Processador</button>
+        <button class="btn sm" id="btnFecharAdmin" style="align-self:center">✕ Voltar ao sistema</button>
       </div>
 
       <section id="tab-usuarios">
@@ -154,8 +159,8 @@
             <div class="fld"><label>Nome</label><input type="text" id="nuNome" placeholder="Nome do usuário"></div>
             <button class="btn gold" id="btnAddUser">+ Incluir</button>
           </div>
-          <div style="margin-top:12px"><div class="fld"><label>Módulos liberados</label><div class="chips" id="nuMods"></div></div></div>
-          <p class="note" style="margin:10px 0 0">O usuário entra com essa conta Google. Ele só vê os módulos marcados. Para bloquear o acesso sem apagar o cadastro, desmarque "Ativo".</p>
+          <div id="nuMods" style="margin-top:12px"></div>
+          <p class="note" style="margin:10px 0 0">O usuário entra com essa conta Google. Ele só vê os sistemas e módulos marcados. "Todos (inclusive futuros)" libera também os módulos que surgirem em novas versões. Para bloquear o acesso sem apagar o cadastro, desmarque "Ativo".</p>
         </div>
         <div class="box">
           <h3>Usuários cadastrados</h3>
@@ -165,16 +170,17 @@
 
       <section id="tab-versao" class="hidden">
         <div class="box">
-          <h3>Versão publicada</h3>
-          <div id="verInfo" class="kv"></div>
+          <h3>Versões publicadas</h3>
+          <div id="verInfo"></div>
         </div>
         <div class="box">
-          <h3>Publicar nova versão do Processador</h3>
-          <div class="drop" id="pubDrop">Clique ou arraste aqui o arquivo <b>processador_fiscal_*.html</b></div>
+          <h3>Publicar nova versão</h3>
+          <div class="row" style="margin-bottom:12px"><div class="fld"><label>Sistema</label><div class="chips" id="pubSis"></div></div></div>
+          <div class="drop" id="pubDrop">Clique ou arraste aqui o arquivo <b id="pubHint">.html</b></div>
           <input type="file" id="pubFile" accept=".html,.htm" class="hidden">
           <div id="pubPreview" class="note" style="margin-top:12px"></div>
           <div style="margin-top:12px" class="row"><button class="btn gold hidden" id="btnPublicar">⬆ Publicar esta versão</button></div>
-          <p class="note" style="margin-top:12px">O arquivo fica guardado no banco de dados protegido (Firestore), não no GitHub. Os módulos são lidos das abas do Processador; novos módulos aparecem automaticamente para você liberar aos usuários.</p>
+          <p class="note" style="margin-top:12px">O arquivo fica guardado no banco de dados protegido (Firestore), não no GitHub. Os módulos são lidos das abas do sistema; novos módulos aparecem automaticamente para você liberar aos usuários.</p>
         </div>
       </section>
 
@@ -204,13 +210,20 @@ const firebaseConfig = {
 const OWNER = "wssolucoestributarias01@gmail.com";
 const CHUNK = 450000;   // caracteres por parte (limite do Firestore: ~1 MB por documento)
 
+// Sistemas do portal: como trocar de módulo, onde ficam no banco e qual campo guarda a permissão
+const SISTEMAS = {
+  proc: { nome: "Processador Fiscal", fn: "switchModule", meta: "meta",      parte: "parte_",      campo: "modulos",      dica: "processador_fiscal_*.html" },
+  sped: { nome: "SPED Manager",       fn: "pg",           meta: "sped_meta", parte: "sped_parte_", campo: "modulos_sped", dica: "sped_manager_*.html" }
+};
+const ORDEM = ["proc", "sped"];
+
 const fb = initializeApp(firebaseConfig);
 const auth = getAuth(fb);
 const db = getFirestore(fb);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let ME = null, META = null, USERS = [], PUB = null;
+let ME = null, META = {}, USERS = [], PUB = null, PUBSIS = "proc", CUR = null, CARREGADOS = {};
 
 function show(id, txt){
   ["scrLoading","scrLogin","scrDenied","app"].forEach(s => $(s).classList.toggle("hidden", s !== id));
@@ -224,6 +237,13 @@ function fmtData(ts){
   if (!ts) return "-";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleString("pt-BR", {dateStyle:"short", timeStyle:"short"});
+}
+function todosDe(sis){ return (META[sis]?.modulos || []).map(m => m.id); }
+function permDe(sis){
+  const todos = todosDe(sis);
+  if (ME.admin) return todos;
+  const lib = ME.perfil?.[SISTEMAS[sis].campo] || [];
+  return lib.includes("*") ? todos : todos.filter(id => lib.includes(id));
 }
 
 // ── Login ───────────────────────────────────────────
@@ -240,7 +260,7 @@ $("btnLogin").onclick = async () => {
 $("btnLogout").onclick = $("btnLogout2").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
-  if (!user) { ME = null; $("frame").srcdoc = ""; show("scrLogin"); return; }
+  if (!user) { ME = null; limparFrames(); show("scrLogin"); return; }
   show("scrLoading", "Verificando acesso...");
   const email = (user.email || "").toLowerCase();
   let perfil = null;
@@ -248,50 +268,75 @@ onAuthStateChanged(auth, async user => {
   catch (e) { console.warn("perfil", e); }
   const owner = email === OWNER;
   if (!owner && (!perfil || perfil.ativo !== true)) {
-    $("deniedTxt").innerHTML = "A conta <b>" + esc(email) + "</b> não está liberada no Processador Fiscal." +
+    $("deniedTxt").innerHTML = "A conta <b>" + esc(email) + "</b> não está liberada no Portal Fiscal WS." +
       (perfil ? " O acesso dela está suspenso." : "") + "<br>Peça a liberação ao administrador da WS Soluções Tributárias.";
     show("scrDenied"); return;
   }
-  ME = { email, nome: perfil?.nome || user.displayName || email, owner, admin: owner || perfil?.admin === true, modulos: perfil?.modulos || [] };
+  ME = { email, perfil, nome: perfil?.nome || user.displayName || email, owner, admin: owner || perfil?.admin === true };
   addDoc(collection(db, "acessos"), { email, nome: ME.nome, ts: serverTimestamp(), ua: navigator.userAgent.slice(0, 160) }).catch(() => {});
   $("whoTxt").textContent = ME.nome + (ME.nome !== email ? " · " + email : "");
   $("btnAdmin").classList.toggle("hidden", !ME.admin);
   show("app");
-  await abrirProcessador();
+  await carregarMetas();
+  montarAbas();
 });
 
-// ── Carrega o Processador do Firestore ──────────────
+async function carregarMetas(){
+  META = {};
+  await Promise.all(ORDEM.map(async sis => {
+    try { const m = await getDoc(doc(db, "app", SISTEMAS[sis].meta)); if (m.exists()) META[sis] = m.data(); }
+    catch (e) { console.warn("meta", sis, e); }
+  }));
+}
+function sistemasDisponiveis(){
+  return ORDEM.filter(sis => ME.admin || (META[sis] && permDe(sis).length));
+}
+function montarAbas(){
+  const lista = sistemasDisponiveis();
+  $("sysTabs").innerHTML = lista.length > 1 ? lista.map(s => '<button class="systab" data-sis="' + s + '">' + esc(SISTEMAS[s].nome) + '</button>').join("") : "";
+  $("sysTabs").querySelectorAll(".systab").forEach(b => b.onclick = () => abrirSistema(b.dataset.sis));
+  if (!lista.length) { frameMsg("Nenhum módulo foi liberado para a sua conta. Fale com o administrador."); return; }
+  abrirSistema(CUR && lista.includes(CUR) ? CUR : lista[0], true);
+}
+
+// ── Carrega um sistema do Firestore num iframe próprio ─
 function frameMsg(html){ const m = $("frameMsg"); m.innerHTML = html; m.classList.toggle("hidden", !html); }
-async function abrirProcessador(){
-  frameMsg('<div class="spin"></div>Carregando o Processador...');
+function limparFrames(){ document.querySelectorAll("#frameWrap iframe").forEach(f => f.remove()); CARREGADOS = {}; CUR = null; }
+async function abrirSistema(sis, forcar){
+  CUR = sis;
+  $("sysTabs").querySelectorAll(".systab").forEach(b => b.classList.toggle("on", b.dataset.sis === sis));
+  const meta = META[sis];
+  $("verTxt").textContent = SISTEMAS[sis].nome + (meta?.versao ? " v" + meta.versao : "");
+  document.querySelectorAll("#frameWrap iframe").forEach(f => f.style.display = f.dataset.sis === sis ? "block" : "none");
+  if (CARREGADOS[sis] && !forcar) { frameMsg(""); return; }
+  if (!meta) {
+    frameMsg(ME.admin ? "Nenhuma versão do " + esc(SISTEMAS[sis].nome) + " publicada ainda.<br><br><button class=\"btn gold\" onclick=\"window.__wsAbrirAdmin('versao','" + sis + "')\">Publicar a primeira versão</button>"
+                      : esc(SISTEMAS[sis].nome) + " em manutenção. Tente novamente mais tarde.");
+    return;
+  }
+  const perm = permDe(sis);
+  if (!perm.length) { frameMsg("Nenhum módulo do " + esc(SISTEMAS[sis].nome) + " liberado para a sua conta."); return; }
+  frameMsg('<div class="spin"></div>Carregando o ' + esc(SISTEMAS[sis].nome) + '...');
   try {
-    const m = await getDoc(doc(db, "app", "meta"));
-    if (!m.exists()) {
-      META = null; $("verTxt").textContent = "";
-      frameMsg(ME.admin ? 'Nenhuma versão publicada ainda.<br><br><button class="btn gold" onclick="window.__wsAbrirAdmin(\'versao\')">Publicar a primeira versão</button>'
-                        : "O Processador está em manutenção. Tente novamente mais tarde.");
-      return;
-    }
-    META = m.data();
-    $("verTxt").textContent = META.versao ? "v" + META.versao : "";
-    const todos = (META.modulos || []).map(x => x.id);
-    const perm = ME.admin ? todos : todos.filter(id => (ME.modulos || []).includes(id));
-    if (!perm.length) { frameMsg("Nenhum módulo foi liberado para a sua conta. Fale com o administrador."); return; }
-    const partes = await Promise.all(Array.from({length: META.partes}, (_, i) => getDoc(doc(db, "app", "parte_" + i))));
+    const partes = await Promise.all(Array.from({length: meta.partes}, (_, i) => getDoc(doc(db, "app", SISTEMAS[sis].parte + i))));
     let html = partes.map(p => p.exists() ? p.data().t : "").join("");
-    const navs = Object.fromEntries((META.modulos || []).map(x => [x.id, x.nav]));
-    const esconder = todos.filter(id => !perm.includes(id)).map(id => navs[id]).filter(Boolean);
-    const inj = "<scr" + "ipt>(function(){var H=" + JSON.stringify(esconder) + ",P=" + JSON.stringify(perm) + ";" +
-      "function go(){H.forEach(function(n){var b=document.getElementById(n);if(b)b.style.display='none';});" +
-      "var a=document.querySelector('.nav-tab.active');var ok=a&&H.indexOf(a.id)<0;" +
-      "if(!ok&&typeof switchModule==='function'){try{switchModule(P[0]);}catch(e){console.warn(e);}}}" +
+    const todos = todosDe(sis);
+    const esconder = todos.filter(id => !perm.includes(id));
+    const inj = "<scr" + "ipt>(function(){var H=" + JSON.stringify(esconder) + ",P=" + JSON.stringify(perm) + ",F=" + JSON.stringify(SISTEMAS[sis].fn) + ",D=" + JSON.stringify(todos[0] || "") + ";" +
+      "function go(){var els=document.querySelectorAll('[onclick]');for(var i=0;i<els.length;i++){var oc=els[i].getAttribute('onclick')||'';" +
+      "for(var j=0;j<H.length;j++){if(oc.indexOf(F+\"('\"+H[j]+\"')\")>=0){els[i].style.display='none';}}}" +
+      "if(H.indexOf(D)>=0&&typeof window[F]==='function'){try{window[F](P[0]);}catch(e){console.warn(e);}}}" +
       "if(document.readyState==='complete')go();else window.addEventListener('load',go);})();</scr" + "ipt>";
-    html = html.includes("</body>") ? html.replace(/<\/body>(?![\s\S]*<\/body>)/, inj + "</body>") : html + inj;
-    $("frame").srcdoc = html;
-    frameMsg("");
+    html = /<\/body>/i.test(html) ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, inj + "</body>") : html + inj;
+    let fr = document.querySelector('#frameWrap iframe[data-sis="' + sis + '"]');
+    if (!fr) { fr = document.createElement("iframe"); fr.dataset.sis = sis; fr.title = SISTEMAS[sis].nome; fr.setAttribute("allow", "clipboard-write"); $("frameWrap").prepend(fr); }
+    fr.style.display = CUR === sis ? "block" : "none";
+    fr.srcdoc = html;
+    CARREGADOS[sis] = true;
+    if (CUR === sis) frameMsg("");
   } catch (e) {
     console.error(e);
-    frameMsg("Não foi possível carregar o Processador (" + esc(e.code || e.message) + ").");
+    frameMsg("Não foi possível carregar o " + esc(SISTEMAS[sis].nome) + " (" + esc(e.code || e.message) + ").");
   }
 }
 
@@ -307,31 +352,59 @@ function abaAdmin(t){
   if (t === "versao") mostrarVersao();
   if (t === "acessos") carregarAcessos();
 }
-function abrirAdmin(t){ if (!ME?.admin) return; $("admin").classList.remove("hidden"); abaAdmin(t || "usuarios"); }
+function abrirAdmin(t, sis){ if (!ME?.admin) return; if (sis) PUBSIS = sis; $("admin").classList.remove("hidden"); abaAdmin(t || "usuarios"); }
 
-function modulosDisponiveis(){ return META?.modulos || []; }
-function chipsHtml(sel, prefix){
-  const mods = modulosDisponiveis();
-  if (!mods.length) return '<span class="note">Publique uma versão do Processador para listar os módulos.</span>';
-  return mods.map(m => '<label class="chip' + (sel.includes(m.id) ? " on" : "") + '"><input type="checkbox" data-p="' + prefix + '" value="' + esc(m.id) + '"' + (sel.includes(m.id) ? " checked" : "") + '>' + esc(m.label) + '</label>').join("");
+function chipsSistema(sis, sel, prefix){
+  const mods = META[sis]?.modulos || [];
+  const all = sel.includes("*");
+  let h = '<div class="grp"><b>' + esc(SISTEMAS[sis].nome) + '</b><div class="chips">';
+  if (!mods.length) return h + '<span class="note">Nenhuma versão publicada.</span></div></div>';
+  h += '<label class="chip all' + (all ? " on" : "") + '"><input type="checkbox" data-p="' + prefix + '" data-s="' + sis + '" value="*"' + (all ? " checked" : "") + '>Todos (inclusive futuros)</label>';
+  h += mods.map(m => { const on = all || sel.includes(m.id); return '<label class="chip' + (on ? " on" : "") + '"><input type="checkbox" data-p="' + prefix + '" data-s="' + sis + '" value="' + esc(m.id) + '"' + (on ? " checked" : "") + '>' + esc(m.label) + '</label>'; }).join("");
+  return h + "</div></div>";
 }
-document.addEventListener("change", e => { if (e.target.matches(".chip input")) e.target.parentElement.classList.toggle("on", e.target.checked); });
-function lerChips(prefix){ return [...document.querySelectorAll('.chip input[data-p="' + prefix + '"]:checked')].map(i => i.value); }
+function chipsTodos(perfil, prefix){ return ORDEM.map(sis => chipsSistema(sis, perfil?.[SISTEMAS[sis].campo] || [], prefix)).join(""); }
+document.addEventListener("change", e => {
+  const inp = e.target; if (!inp.matches(".chip input")) return;
+  inp.parentElement.classList.toggle("on", inp.checked);
+  if (inp.value === "*") {   // "Todos" marca/desmarca o grupo inteiro
+    document.querySelectorAll('.chip input[data-p="' + inp.dataset.p + '"][data-s="' + inp.dataset.s + '"]').forEach(o => { o.checked = inp.checked; o.parentElement.classList.toggle("on", inp.checked); });
+  } else if (!inp.checked) {
+    const t = document.querySelector('.chip input[data-p="' + inp.dataset.p + '"][data-s="' + inp.dataset.s + '"][value="*"]');
+    if (t) { t.checked = false; t.parentElement.classList.remove("on"); }
+  }
+});
+function lerChips(prefix){
+  const out = {};
+  ORDEM.forEach(sis => {
+    const sel = [...document.querySelectorAll('.chip input[data-p="' + prefix + '"][data-s="' + sis + '"]:checked')].map(i => i.value);
+    out[SISTEMAS[sis].campo] = sel.includes("*") ? ["*"] : sel;
+  });
+  return out;
+}
+function resumoPerm(u){
+  return ORDEM.map(sis => {
+    const lib = u[SISTEMAS[sis].campo] || [];
+    const n = lib.includes("*") ? "todos" : lib.length;
+    return esc(SISTEMAS[sis].nome) + ": " + n;
+  }).join(" · ");
+}
 
 async function carregarUsuarios(){
-  $("nuMods").innerHTML = chipsHtml([], "nu");
+  await carregarMetas();
+  $("nuMods").innerHTML = chipsTodos({}, "nu");
   $("userList").textContent = "Carregando...";
   try {
     const s = await getDocs(collection(db, "usuarios"));
     USERS = s.docs.map(d => ({ email: d.id, ...d.data() })).sort((a, b) => a.email.localeCompare(b.email));
-    let h = '<table><thead><tr><th>Usuário</th><th>Situação</th><th>Módulos liberados</th><th></th></tr></thead><tbody>';
-    h += '<tr><td><b>' + esc(OWNER) + '</b><div class="note">Dono do sistema</div></td><td><span class="tag adm">Administrador</span></td><td class="note">Todos os módulos</td><td></td></tr>';
+    let h = '<table><thead><tr><th style="width:26%">Usuário</th><th style="width:14%">Situação</th><th>Sistemas e módulos</th><th></th></tr></thead><tbody>';
+    h += '<tr><td><b>' + esc(OWNER) + '</b><div class="note">Dono do sistema</div></td><td><span class="tag adm">Administrador</span></td><td class="note">Todos os sistemas e módulos</td><td></td></tr>';
     USERS.filter(u => u.email !== OWNER).forEach((u, i) => {
       const p = "u" + i;
       h += '<tr data-email="' + esc(u.email) + '" data-p="' + p + '"><td><b>' + esc(u.nome || "-") + '</b><div class="note">' + esc(u.email) + '</div>' +
         '<div class="note" style="margin-top:6px"><label><input type="checkbox" class="fAtivo"' + (u.ativo ? " checked" : "") + '> Ativo</label> &nbsp; <label><input type="checkbox" class="fAdmin"' + (u.admin ? " checked" : "") + '> Administrador</label></div></td>' +
-        '<td>' + (u.ativo ? '<span class="tag ok">Ativo</span>' : '<span class="tag off">Bloqueado</span>') + (u.admin ? ' <span class="tag adm">Admin</span>' : "") + '</td>' +
-        '<td><div class="chips">' + chipsHtml(u.modulos || [], p) + '</div></td>' +
+        '<td>' + (u.ativo ? '<span class="tag ok">Ativo</span>' : '<span class="tag off">Bloqueado</span>') + (u.admin ? ' <span class="tag adm">Admin</span>' : "") + '<div class="note" style="margin-top:6px">' + resumoPerm(u) + '</div></td>' +
+        '<td>' + chipsTodos(u, p) + '</td>' +
         '<td style="white-space:nowrap"><button class="btn sm gold" data-act="salvar">Salvar</button> <button class="btn sm danger" data-act="remover">Remover</button></td></tr>';
     });
     h += "</tbody></table>";
@@ -344,7 +417,7 @@ $("userList").addEventListener("click", async e => {
   const tr = b.closest("tr"), email = tr.dataset.email, p = tr.dataset.p;
   if (b.dataset.act === "salvar") {
     try {
-      await setDoc(doc(db, "usuarios", email), { ativo: tr.querySelector(".fAtivo").checked, admin: tr.querySelector(".fAdmin").checked, modulos: lerChips(p), atualizadoEm: serverTimestamp(), atualizadoPor: ME.email }, { merge: true });
+      await setDoc(doc(db, "usuarios", email), { ativo: tr.querySelector(".fAtivo").checked, admin: tr.querySelector(".fAdmin").checked, ...lerChips(p), atualizadoEm: serverTimestamp(), atualizadoPor: ME.email }, { merge: true });
       toast("Permissões de " + email + " salvas."); carregarUsuarios();
     } catch (err) { toast("Erro ao salvar: " + (err.code || err.message), true); }
   }
@@ -359,7 +432,7 @@ $("btnAddUser").onclick = async () => {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast("Informe um e-mail válido.", true); return; }
   if (email === OWNER) { toast("Esse e-mail já é o dono do sistema.", true); return; }
   try {
-    await setDoc(doc(db, "usuarios", email), { nome: $("nuNome").value.trim() || email, ativo: true, admin: false, modulos: lerChips("nu"), criadoEm: serverTimestamp(), criadoPor: ME.email });
+    await setDoc(doc(db, "usuarios", email), { nome: $("nuNome").value.trim() || email, ativo: true, admin: false, ...lerChips("nu"), criadoEm: serverTimestamp(), criadoPor: ME.email });
     $("nuEmail").value = ""; $("nuNome").value = "";
     toast(email + " incluído."); carregarUsuarios();
   } catch (err) { toast("Erro ao incluir: " + (err.code || err.message), true); }
@@ -367,24 +440,32 @@ $("btnAddUser").onclick = async () => {
 
 // ── Publicar versão ─────────────────────────────────
 function mostrarVersao(){
-  $("verInfo").innerHTML = META
-    ? '<div>Versão</div><div>' + esc(META.versao || "-") + '</div><div>Arquivo</div><div>' + esc(META.arquivo || "-") + '</div><div>Publicada em</div><div>' + fmtData(META.publicadoEm) + ' por ' + esc(META.por || "-") + '</div><div>Tamanho</div><div>' + ((META.tamanho || 0) / 1024).toFixed(0) + ' KB em ' + META.partes + ' parte(s)</div><div>Módulos</div><div>' + (META.modulos || []).map(m => esc(m.label)).join(" · ") + '</div>'
-    : '<div>Situação</div><div>Nenhuma versão publicada</div>';
+  $("verInfo").innerHTML = ORDEM.map(sis => {
+    const m = META[sis];
+    return '<div class="grp"><b>' + esc(SISTEMAS[sis].nome) + '</b><div class="kv">' + (m
+      ? '<div>Versão</div><div>' + esc(m.versao || "-") + '</div><div>Arquivo</div><div>' + esc(m.arquivo || "-") + '</div><div>Publicada em</div><div>' + fmtData(m.publicadoEm) + ' por ' + esc(m.por || "-") + '</div><div>Tamanho</div><div>' + ((m.tamanho || 0) / 1024).toFixed(0) + ' KB em ' + m.partes + ' parte(s)</div><div>Módulos</div><div>' + (m.modulos || []).map(x => esc(x.label)).join(" · ") + '</div>'
+      : '<div>Situação</div><div>Nenhuma versão publicada</div>') + '</div></div>';
+  }).join("");
+  $("pubSis").innerHTML = ORDEM.map(sis => '<label class="chip' + (sis === PUBSIS ? " on" : "") + '"><input type="radio" name="pubsis" value="' + sis + '"' + (sis === PUBSIS ? " checked" : "") + '>' + esc(SISTEMAS[sis].nome) + '</label>').join("");
+  $("pubSis").querySelectorAll("input").forEach(r => r.onchange = () => { PUBSIS = r.value; PUB = null; $("pubPreview").innerHTML = ""; $("btnPublicar").classList.add("hidden"); mostrarVersao(); });
+  $("pubHint").textContent = SISTEMAS[PUBSIS].dica;
 }
-function extrairModulos(html){
-  const out = [], re = /<button\b[^>]*>[\s\S]*?<\/button>/g; let m;
+function extrairModulos(html, fn){
+  const out = [];
+  const re = new RegExp('<(button|div|a|li|span)\\b[^>]*onclick="' + fn + "\\('([\\w-]+)'\\)\"[^>]*>([\\s\\S]*?)<\\/\\1>", "g");
+  let m;
   while ((m = re.exec(html))) {
-    const tag = m[0];
-    const id = (tag.match(/\bid="(nav\w+)"/) || [])[1];
-    const mod = (tag.match(/switchModule\('(\w+)'\)/) || [])[1];
-    if (!id || !mod || out.some(x => x.id === mod)) continue;
-    const label = tag.replace(/^<button\b[^>]*>/, "").replace(/<\/button>$/, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-    out.push({ id: mod, nav: id, label: label || mod });
+    const id = m[2];
+    if (out.some(x => x.id === id)) continue;
+    const label = m[3].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    out.push({ id, label: label || id });
   }
   return out;
 }
 function versaoDoNome(nome){
-  const m = nome.match(/(\d+)[_.](\d+)(?:[_.](\d+))?/); return m ? [m[1], m[2], m[3]].filter(Boolean).join(".") : "";
+  let m = nome.match(/(\d+)[_.](\d+)(?:[_.](\d+))?/);
+  if (m) return [m[1], m[2], m[3]].filter(Boolean).join(".");
+  m = nome.match(/v(\d+)/i); return m ? m[1] : "";
 }
 $("pubDrop").onclick = () => $("pubFile").click();
 ["dragover","dragenter"].forEach(ev => $("pubDrop").addEventListener(ev, e => { e.preventDefault(); $("pubDrop").style.borderColor = "var(--gold)"; }));
@@ -392,31 +473,40 @@ $("pubDrop").onclick = () => $("pubFile").click();
 $("pubDrop").addEventListener("drop", e => { if (e.dataTransfer.files[0]) prepararPub(e.dataTransfer.files[0]); });
 $("pubFile").onchange = e => { if (e.target.files[0]) prepararPub(e.target.files[0]); e.target.value = ""; };
 async function prepararPub(file){
+  const S = SISTEMAS[PUBSIS];
   const html = await file.text();
-  const mods = extrairModulos(html);
-  if (!/switchModule/.test(html) || !mods.length) { $("pubPreview").innerHTML = '<span style="color:var(--danger)">Este arquivo não parece ser o Processador Fiscal (não encontrei as abas de módulos).</span>'; $("btnPublicar").classList.add("hidden"); PUB = null; return; }
-  PUB = { html, arquivo: file.name, versao: versaoDoNome(file.name), modulos: mods };
-  const novos = mods.filter(m => !(META?.modulos || []).some(x => x.id === m.id));
-  $("pubPreview").innerHTML = '<b>' + esc(file.name) + '</b> · ' + (html.length / 1024).toFixed(0) + ' KB · versão ' + esc(PUB.versao || "-") +
+  const mods = extrairModulos(html, S.fn);
+  if (!mods.length) {
+    const outro = ORDEM.find(s => s !== PUBSIS && extrairModulos(html, SISTEMAS[s].fn).length);
+    $("pubPreview").innerHTML = '<span style="color:var(--danger)">Este arquivo não parece ser o ' + esc(S.nome) + '.' + (outro ? ' Ele parece ser o <b>' + esc(SISTEMAS[outro].nome) + '</b>: troque o sistema acima.' : '') + '</span>';
+    $("btnPublicar").classList.add("hidden"); PUB = null; return;
+  }
+  PUB = { sis: PUBSIS, html, arquivo: file.name, versao: versaoDoNome(file.name), modulos: mods };
+  const novos = mods.filter(m => !(META[PUBSIS]?.modulos || []).some(x => x.id === m.id));
+  $("pubPreview").innerHTML = '<b>' + esc(S.nome) + '</b> · ' + esc(file.name) + ' · ' + (html.length / 1024).toFixed(0) + ' KB · versão ' + esc(PUB.versao || "-") +
     '<br>' + mods.length + ' módulos: ' + mods.map(m => esc(m.label)).join(" · ") +
-    (novos.length ? '<br><span style="color:var(--gold)">Novos módulos: ' + novos.map(m => esc(m.label)).join(", ") + ' (libere aos usuários na aba Usuários).</span>' : "");
+    (novos.length && META[PUBSIS] ? '<br><span style="color:var(--gold)">Novos módulos: ' + novos.map(m => esc(m.label)).join(", ") + '. Quem tem "Todos" recebe automaticamente; os demais você libera na aba Usuários.</span>' : "");
   $("btnPublicar").classList.remove("hidden");
 }
 $("btnPublicar").onclick = async () => {
   if (!PUB) return;
+  const S = SISTEMAS[PUB.sis];
   const b = $("btnPublicar"); b.disabled = true; b.textContent = "Publicando...";
   try {
     const partes = [];
     for (let i = 0; i < PUB.html.length; i += CHUNK) partes.push(PUB.html.slice(i, i + CHUNK));
-    const antigas = META?.partes || 0;
+    const antigas = META[PUB.sis]?.partes || 0;
     const batch = writeBatch(db);
-    partes.forEach((t, i) => batch.set(doc(db, "app", "parte_" + i), { t, i }));
-    for (let i = partes.length; i < antigas; i++) batch.delete(doc(db, "app", "parte_" + i));
-    batch.set(doc(db, "app", "meta"), { versao: PUB.versao, arquivo: PUB.arquivo, partes: partes.length, tamanho: PUB.html.length, modulos: PUB.modulos, publicadoEm: serverTimestamp(), por: ME.email });
+    partes.forEach((t, i) => batch.set(doc(db, "app", S.parte + i), { t, i }));
+    for (let i = partes.length; i < antigas; i++) batch.delete(doc(db, "app", S.parte + i));
+    batch.set(doc(db, "app", S.meta), { sistema: PUB.sis, versao: PUB.versao, arquivo: PUB.arquivo, partes: partes.length, tamanho: PUB.html.length, modulos: PUB.modulos, publicadoEm: serverTimestamp(), por: ME.email });
     await batch.commit();
-    toast("Versão " + (PUB.versao || PUB.arquivo) + " publicada.");
+    toast(S.nome + " " + (PUB.versao || PUB.arquivo) + " publicado.");
+    const sis = PUB.sis;
     PUB = null; $("pubPreview").innerHTML = ""; b.classList.add("hidden");
-    await abrirProcessador(); mostrarVersao();
+    await carregarMetas(); mostrarVersao();
+    CARREGADOS[sis] = false; montarAbas();
+    if (CUR !== sis) abrirSistema(sis, true);
   } catch (e) { toast("Erro ao publicar: " + (e.code || e.message), true); }
   finally { b.disabled = false; b.textContent = "⬆ Publicar esta versão"; }
 };
@@ -432,6 +522,7 @@ async function carregarAcessos(){
       '</tbody></table>';
   } catch (e) { $("logList").textContent = "Erro ao carregar acessos: " + (e.code || e.message); }
 }
+
 </script>
 </body>
 </html>
