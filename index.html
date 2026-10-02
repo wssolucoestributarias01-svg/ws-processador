@@ -213,9 +213,13 @@ const CHUNK = 450000;   // caracteres por parte (limite do Firestore: ~1 MB por 
 // Sistemas do portal: como trocar de módulo, onde ficam no banco e qual campo guarda a permissão
 const SISTEMAS = {
   proc: { nome: "Processador Fiscal", fn: "switchModule", meta: "meta",      parte: "parte_",      campo: "modulos",      dica: "processador_fiscal_*.html" },
-  sped: { nome: "SPED Manager",       fn: "pg",           meta: "sped_meta", parte: "sped_parte_", campo: "modulos_sped", dica: "sped_manager_*.html" }
+  sped: { nome: "SPED Manager",       fn: "pg",           meta: "sped_meta", parte: "sped_parte_", campo: "modulos_sped", dica: "sped_manager_*.html" },
+  // Analista Paito: só administradores; código guardado em "privado" (as regras só deixam admin ler)
+  paito: { nome: "Analista Paito",    fn: null, coll: "privado", meta: "paito_meta", parte: "paito_parte_", campo: null, adminOnly: true, dica: "analista_paito*.html" }
 };
-const ORDEM = ["proc", "sped"];
+const ORDEM = ["proc", "sped", "paito"];
+const ORDEM_USU = ORDEM.filter(s => !SISTEMAS[s].adminOnly);
+const ref = (sis, id) => doc(db, SISTEMAS[sis].coll || "app", id);
 
 const fb = initializeApp(firebaseConfig);
 const auth = getAuth(fb);
@@ -242,6 +246,7 @@ function todosDe(sis){ return (META[sis]?.modulos || []).map(m => m.id); }
 function permDe(sis){
   const todos = todosDe(sis);
   if (ME.admin) return todos;
+  if (SISTEMAS[sis].adminOnly) return [];
   const lib = ME.perfil?.[SISTEMAS[sis].campo] || [];
   return lib.includes("*") ? todos : todos.filter(id => lib.includes(id));
 }
@@ -284,12 +289,13 @@ onAuthStateChanged(auth, async user => {
 async function carregarMetas(){
   META = {};
   await Promise.all(ORDEM.map(async sis => {
-    try { const m = await getDoc(doc(db, "app", SISTEMAS[sis].meta)); if (m.exists()) META[sis] = m.data(); }
+    if (SISTEMAS[sis].adminOnly && !ME.admin) return;
+    try { const m = await getDoc(ref(sis, SISTEMAS[sis].meta)); if (m.exists()) META[sis] = m.data(); }
     catch (e) { console.warn("meta", sis, e); }
   }));
 }
 function sistemasDisponiveis(){
-  return ORDEM.filter(sis => ME.admin || (META[sis] && permDe(sis).length));
+  return ORDEM.filter(sis => ME.admin || (!SISTEMAS[sis].adminOnly && META[sis] && permDe(sis).length));
 }
 function montarAbas(){
   const lista = sistemasDisponiveis();
@@ -318,16 +324,16 @@ async function abrirSistema(sis, forcar){
   if (!perm.length) { frameMsg("Nenhum módulo do " + esc(SISTEMAS[sis].nome) + " liberado para a sua conta."); return; }
   frameMsg('<div class="spin"></div>Carregando o ' + esc(SISTEMAS[sis].nome) + '...');
   try {
-    const partes = await Promise.all(Array.from({length: meta.partes}, (_, i) => getDoc(doc(db, "app", SISTEMAS[sis].parte + i))));
+    const partes = await Promise.all(Array.from({length: meta.partes}, (_, i) => getDoc(ref(sis, SISTEMAS[sis].parte + i))));
     let html = partes.map(p => p.exists() ? p.data().t : "").join("");
     const todos = todosDe(sis);
     const esconder = todos.filter(id => !perm.includes(id));
-    const inj = "<scr" + "ipt>(function(){var H=" + JSON.stringify(esconder) + ",P=" + JSON.stringify(perm) + ",F=" + JSON.stringify(SISTEMAS[sis].fn) + ",D=" + JSON.stringify(todos[0] || "") + ";" +
+    const inj = !SISTEMAS[sis].fn ? "" : "<scr" + "ipt>(function(){var H=" + JSON.stringify(esconder) + ",P=" + JSON.stringify(perm) + ",F=" + JSON.stringify(SISTEMAS[sis].fn) + ",D=" + JSON.stringify(todos[0] || "") + ";" +
       "function go(){var els=document.querySelectorAll('[onclick]');for(var i=0;i<els.length;i++){var oc=els[i].getAttribute('onclick')||'';" +
       "for(var j=0;j<H.length;j++){if(oc.indexOf(F+\"('\"+H[j]+\"')\")>=0){els[i].style.display='none';}}}" +
       "if(H.indexOf(D)>=0&&typeof window[F]==='function'){try{window[F](P[0]);}catch(e){console.warn(e);}}}" +
       "if(document.readyState==='complete')go();else window.addEventListener('load',go);})();</scr" + "ipt>";
-    html = /<\/body>/i.test(html) ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, inj + "</body>") : html + inj;
+    if (inj) html = /<\/body>/i.test(html) ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, inj + "</body>") : html + inj;
     let fr = document.querySelector('#frameWrap iframe[data-sis="' + sis + '"]');
     if (!fr) { fr = document.createElement("iframe"); fr.dataset.sis = sis; fr.title = SISTEMAS[sis].nome; fr.setAttribute("allow", "clipboard-write"); $("frameWrap").prepend(fr); }
     fr.style.display = CUR === sis ? "block" : "none";
@@ -363,7 +369,7 @@ function chipsSistema(sis, sel, prefix){
   h += mods.map(m => { const on = all || sel.includes(m.id); return '<label class="chip' + (on ? " on" : "") + '"><input type="checkbox" data-p="' + prefix + '" data-s="' + sis + '" value="' + esc(m.id) + '"' + (on ? " checked" : "") + '>' + esc(m.label) + '</label>'; }).join("");
   return h + "</div></div>";
 }
-function chipsTodos(perfil, prefix){ return ORDEM.map(sis => chipsSistema(sis, perfil?.[SISTEMAS[sis].campo] || [], prefix)).join(""); }
+function chipsTodos(perfil, prefix){ return ORDEM_USU.map(sis => chipsSistema(sis, perfil?.[SISTEMAS[sis].campo] || [], prefix)).join(""); }
 document.addEventListener("change", e => {
   const inp = e.target; if (!inp.matches(".chip input")) return;
   inp.parentElement.classList.toggle("on", inp.checked);
@@ -376,14 +382,14 @@ document.addEventListener("change", e => {
 });
 function lerChips(prefix){
   const out = {};
-  ORDEM.forEach(sis => {
+  ORDEM_USU.forEach(sis => {
     const sel = [...document.querySelectorAll('.chip input[data-p="' + prefix + '"][data-s="' + sis + '"]:checked')].map(i => i.value);
     out[SISTEMAS[sis].campo] = sel.includes("*") ? ["*"] : sel;
   });
   return out;
 }
 function resumoPerm(u){
-  return ORDEM.map(sis => {
+  return ORDEM_USU.map(sis => {
     const lib = u[SISTEMAS[sis].campo] || [];
     const n = lib.includes("*") ? "todos" : lib.length;
     return esc(SISTEMAS[sis].nome) + ": " + n;
@@ -451,6 +457,7 @@ function mostrarVersao(){
   $("pubHint").textContent = SISTEMAS[PUBSIS].dica;
 }
 function extrairModulos(html, fn){
+  if (!fn) return /WS Analytics/.test(html) ? [{ id: "paito", label: "Analista Paito" }] : [];
   const out = [];
   const re = new RegExp('<(button|div|a|li|span)\\b[^>]*onclick="' + fn + "\\('([\\w-]+)'\\)\"[^>]*>([\\s\\S]*?)<\\/\\1>", "g");
   let m;
@@ -497,9 +504,9 @@ $("btnPublicar").onclick = async () => {
     for (let i = 0; i < PUB.html.length; i += CHUNK) partes.push(PUB.html.slice(i, i + CHUNK));
     const antigas = META[PUB.sis]?.partes || 0;
     const batch = writeBatch(db);
-    partes.forEach((t, i) => batch.set(doc(db, "app", S.parte + i), { t, i }));
-    for (let i = partes.length; i < antigas; i++) batch.delete(doc(db, "app", S.parte + i));
-    batch.set(doc(db, "app", S.meta), { sistema: PUB.sis, versao: PUB.versao, arquivo: PUB.arquivo, partes: partes.length, tamanho: PUB.html.length, modulos: PUB.modulos, publicadoEm: serverTimestamp(), por: ME.email });
+    partes.forEach((t, i) => batch.set(ref(PUB.sis, S.parte + i), { t, i }));
+    for (let i = partes.length; i < antigas; i++) batch.delete(ref(PUB.sis, S.parte + i));
+    batch.set(ref(PUB.sis, S.meta), { sistema: PUB.sis, versao: PUB.versao, arquivo: PUB.arquivo, partes: partes.length, tamanho: PUB.html.length, modulos: PUB.modulos, publicadoEm: serverTimestamp(), por: ME.email });
     await batch.commit();
     toast(S.nome + " " + (PUB.versao || PUB.arquivo) + " publicado.");
     const sis = PUB.sis;
