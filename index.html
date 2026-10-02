@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Processador Fiscal · WS Soluções Tributárias</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#022351; --navy2:#0a3370; --gold:#F3B53A; --cyan:#4ecdc4;
+    --bg:#0f1218; --surface:#171c25; --surface2:#1e2531; --border:#2a3342;
+    --text:#eef2f8; --muted:#8b97ab; --danger:#ff5d5d; --ok:#3ccf91;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px}
+  button{font-family:inherit}
+  .hidden{display:none!important}
+  .mark{width:44px;height:44px;border-radius:10px;background:var(--navy);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);letter-spacing:.5px;flex-shrink:0}
+  .mark.sm{width:30px;height:30px;font-size:12px;border-width:1.5px;border-radius:7px}
+
+  /* telas centrais */
+  .scr{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 34px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .card .mark{margin:0 auto 18px;width:64px;height:64px;font-size:22px;border-radius:14px}
+  .card h1{font-size:22px;margin:0 0 4px;font-weight:700}
+  .card .sub{color:var(--gold);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px}
+  .card p{color:var(--muted);line-height:1.55;margin:0 0 20px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
+  .btn:hover{border-color:var(--muted)}
+  .btn.primary{background:#fff;color:#1f1f1f;border-color:#fff;width:100%}
+  .btn.primary:hover{background:#f1f1f1}
+  .btn.gold{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+  .btn.sm{padding:6px 12px;font-size:12px;font-weight:500}
+  .btn.danger{color:var(--danger);border-color:rgba(255,93,93,.35)}
+  .msg{margin-top:14px;font-size:12.5px;color:var(--muted);min-height:18px}
+  .msg.err{color:var(--danger)}
+  .spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .foot{margin-top:22px;font-size:11px;color:var(--muted)}
+
+  /* app */
+  #app{height:100%;display:flex;flex-direction:column}
+  .top{height:48px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--navy);border-bottom:2px solid var(--gold)}
+  .top .t{font-weight:700;font-size:14px;white-space:nowrap}
+  .top .t span{color:var(--gold);font-weight:500;margin-left:6px;font-size:12px}
+  .top .sp{flex:1}
+  .top .who{font-size:12px;color:#c9d5ea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+  .top .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+  #frameWrap{flex:1;position:relative;background:#0f0f0f}
+  #frame{position:absolute;inset:0;width:100%;height:100%;border:0}
+  #frameMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--muted);text-align:center;padding:24px}
+
+  /* admin */
+  #admin{position:fixed;inset:48px 0 0 0;background:var(--bg);z-index:10;overflow:auto}
+  .adm{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:18px}
+  .tab{padding:10px 16px;border:0;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent}
+  .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  .box h3{margin:0 0 12px;font-size:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  input[type=text],input[type=email]{padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;min-width:240px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid var(--border);border-radius:20px;font-size:11.5px;cursor:pointer;user-select:none;background:var(--bg)}
+  .chip.on{border-color:var(--cyan);color:var(--cyan);background:rgba(78,205,196,.08)}
+  .chip input{display:none}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+  .tag.ok{background:rgba(60,207,145,.12);color:var(--ok)}
+  .tag.off{background:rgba(255,93,93,.12);color:var(--danger)}
+  .tag.adm{background:rgba(243,181,58,.14);color:var(--gold)}
+  .note{font-size:12px;color:var(--muted);line-height:1.55}
+  .drop{border:2px dashed var(--border);border-radius:var(--radius);padding:26px;text-align:center;color:var(--muted);cursor:pointer}
+  .drop:hover{border-color:var(--gold);color:var(--text)}
+  .kv{display:grid;grid-template-columns:170px 1fr;gap:6px 12px;font-size:13px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .toast{position:fixed;bottom:18px;right:18px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--ok);padding:10px 14px;border-radius:8px;font-size:13px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .toast.err{border-left-color:var(--danger)}
+  @media (max-width:700px){ .top .who{display:none} input[type=text],input[type=email]{min-width:0;width:100%} .fld{width:100%} }
+</style>
+</head>
+<body>
+
+<!-- Carregando -->
+<div id="scrLoading" class="scr">
+  <div class="card"><div class="spin"></div><p id="loadingTxt" style="margin:0">Carregando...</p></div>
+</div>
+
+<!-- Login -->
+<div id="scrLogin" class="scr hidden">
+  <div class="card">
+    <div class="mark">WS</div>
+    <h1>Processador Fiscal</h1>
+    <div class="sub">WS Soluções Tributárias</div>
+    <p>Acesso restrito a usuários autorizados. Entre com a sua conta Google.</p>
+    <button class="btn primary" id="btnLogin">
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      Entrar com Google
+    </button>
+    <div class="msg" id="loginMsg"></div>
+    <div class="foot">© WS Soluções Tributárias</div>
+  </div>
+</div>
+
+<!-- Sem acesso -->
+<div id="scrDenied" class="scr hidden">
+  <div class="card">
+    <div class="mark">WS</div>
+    <h1>Acesso não liberado</h1>
+    <div class="sub">Processador Fiscal</div>
+    <p id="deniedTxt"></p>
+    <button class="btn" id="btnLogout2">Sair e usar outra conta</button>
+  </div>
+</div>
+
+<!-- Aplicação -->
+<div id="app" class="hidden">
+  <div class="top">
+    <div class="mark sm">WS</div>
+    <div class="t">Processador Fiscal<span id="verTxt"></span></div>
+    <div class="sp"></div>
+    <div class="who" id="whoTxt"></div>
+    <button class="btn sm hidden" id="btnAdmin">⚙ Admin</button>
+    <button class="btn sm" id="btnLogout">Sair</button>
+  </div>
+  <div id="frameWrap">
+    <iframe id="frame" title="Processador Fiscal" allow="clipboard-write"></iframe>
+    <div id="frameMsg" class="hidden"></div>
+  </div>
+
+  <!-- Painel Admin -->
+  <div id="admin" class="hidden">
+    <div class="adm">
+      <div class="tabs">
+        <button class="tab on" data-tab="usuarios">Usuários e permissões</button>
+        <button class="tab" data-tab="versao">Publicar versão</button>
+        <button class="tab" data-tab="acessos">Acessos</button>
+        <div style="flex:1"></div>
+        <button class="btn sm" id="btnFecharAdmin" style="align-self:center">✕ Voltar ao Processador</button>
+      </div>
+
+      <section id="tab-usuarios">
+        <div class="box">
+          <h3>Incluir usuário</h3>
+          <div class="row">
+            <div class="fld"><label>E-mail Google</label><input type="email" id="nuEmail" placeholder="nome@gmail.com"></div>
+            <div class="fld"><label>Nome</label><input type="text" id="nuNome" placeholder="Nome do usuário"></div>
+            <button class="btn gold" id="btnAddUser">+ Incluir</button>
+          </div>
+          <div style="margin-top:12px"><div class="fld"><label>Módulos liberados</label><div class="chips" id="nuMods"></div></div></div>
+          <p class="note" style="margin:10px 0 0">O usuário entra com essa conta Google. Ele só vê os módulos marcados. Para bloquear o acesso sem apagar o cadastro, desmarque "Ativo".</p>
+        </div>
+        <div class="box">
+          <h3>Usuários cadastrados</h3>
+          <div id="userList" class="note">Carregando...</div>
+        </div>
+      </section>
+
+      <section id="tab-versao" class="hidden">
+        <div class="box">
+          <h3>Versão publicada</h3>
+          <div id="verInfo" class="kv"></div>
+        </div>
+        <div class="box">
+          <h3>Publicar nova versão do Processador</h3>
+          <div class="drop" id="pubDrop">Clique ou arraste aqui o arquivo <b>processador_fiscal_*.html</b></div>
+          <input type="file" id="pubFile" accept=".html,.htm" class="hidden">
+          <div id="pubPreview" class="note" style="margin-top:12px"></div>
+          <div style="margin-top:12px" class="row"><button class="btn gold hidden" id="btnPublicar">⬆ Publicar esta versão</button></div>
+          <p class="note" style="margin-top:12px">O arquivo fica guardado no banco de dados protegido (Firestore), não no GitHub. Os módulos são lidos das abas do Processador; novos módulos aparecem automaticamente para você liberar aos usuários.</p>
+        </div>
+      </section>
+
+      <section id="tab-acessos" class="hidden">
+        <div class="box">
+          <h3>Últimos acessos</h3>
+          <div id="logList" class="note">Carregando...</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAlUjhhiooBEE_X5kEB0HKUVMK_1h9tnT8",
+  authDomain: "ws-processador.firebaseapp.com",
+  projectId: "ws-processador",
+  storageBucket: "ws-processador.firebasestorage.app",
+  messagingSenderId: "148560770072",
+  appId: "1:148560770072:web:b28d2b2b6e01ba441e3f6d"
+};
+const OWNER = "wssolucoestributarias01@gmail.com";
+const CHUNK = 450000;   // caracteres por parte (limite do Firestore: ~1 MB por documento)
+
+const fb = initializeApp(firebaseConfig);
+const auth = getAuth(fb);
+const db = getFirestore(fb);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let ME = null, META = null, USERS = [], PUB = null;
+
+function show(id, txt){
+  ["scrLoading","scrLogin","scrDenied","app"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+  if (id === "scrLoading") $("loadingTxt").textContent = txt || "Carregando...";
+}
+function toast(t, err){
+  const d = document.createElement("div"); d.className = "toast" + (err ? " err" : ""); d.textContent = t;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3500);
+}
+function fmtData(ts){
+  if (!ts) return "-";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString("pt-BR", {dateStyle:"short", timeStyle:"short"});
+}
+
+// ── Login ───────────────────────────────────────────
+$("btnLogin").onclick = async () => {
+  $("loginMsg").className = "msg"; $("loginMsg").textContent = "Abrindo a janela do Google...";
+  const prov = new GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
+  try { await signInWithPopup(auth, prov); }
+  catch (e) {
+    if (e.code === "auth/popup-blocked") { await signInWithRedirect(auth, prov); return; }
+    $("loginMsg").className = "msg err";
+    $("loginMsg").textContent = e.code === "auth/popup-closed-by-user" ? "Janela fechada antes de concluir o login." : "Não foi possível entrar (" + (e.code || e.message) + ").";
+  }
+};
+$("btnLogout").onclick = $("btnLogout2").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { ME = null; $("frame").srcdoc = ""; show("scrLogin"); return; }
+  show("scrLoading", "Verificando acesso...");
+  const email = (user.email || "").toLowerCase();
+  let perfil = null;
+  try { const s = await getDoc(doc(db, "usuarios", email)); if (s.exists()) perfil = s.data(); }
+  catch (e) { console.warn("perfil", e); }
+  const owner = email === OWNER;
+  if (!owner && (!perfil || perfil.ativo !== true)) {
+    $("deniedTxt").innerHTML = "A conta <b>" + esc(email) + "</b> não está liberada no Processador Fiscal." +
+      (perfil ? " O acesso dela está suspenso." : "") + "<br>Peça a liberação ao administrador da WS Soluções Tributárias.";
+    show("scrDenied"); return;
+  }
+  ME = { email, nome: perfil?.nome || user.displayName || email, owner, admin: owner || perfil?.admin === true, modulos: perfil?.modulos || [] };
+  addDoc(collection(db, "acessos"), { email, nome: ME.nome, ts: serverTimestamp(), ua: navigator.userAgent.slice(0, 160) }).catch(() => {});
+  $("whoTxt").textContent = ME.nome + (ME.nome !== email ? " · " + email : "");
+  $("btnAdmin").classList.toggle("hidden", !ME.admin);
+  show("app");
+  await abrirProcessador();
+});
+
+// ── Carrega o Processador do Firestore ──────────────
+function frameMsg(html){ const m = $("frameMsg"); m.innerHTML = html; m.classList.toggle("hidden", !html); }
+async function abrirProcessador(){
+  frameMsg('<div class="spin"></div>Carregando o Processador...');
+  try {
+    const m = await getDoc(doc(db, "app", "meta"));
+    if (!m.exists()) {
+      META = null; $("verTxt").textContent = "";
+      frameMsg(ME.admin ? 'Nenhuma versão publicada ainda.<br><br><button class="btn gold" onclick="window.__wsAbrirAdmin(\'versao\')">Publicar a primeira versão</button>'
+                        : "O Processador está em manutenção. Tente novamente mais tarde.");
+      return;
+    }
+    META = m.data();
+    $("verTxt").textContent = META.versao ? "v" + META.versao : "";
+    const todos = (META.modulos || []).map(x => x.id);
+    const perm = ME.admin ? todos : todos.filter(id => (ME.modulos || []).includes(id));
+    if (!perm.length) { frameMsg("Nenhum módulo foi liberado para a sua conta. Fale com o administrador."); return; }
+    const partes = await Promise.all(Array.from({length: META.partes}, (_, i) => getDoc(doc(db, "app", "parte_" + i))));
+    let html = partes.map(p => p.exists() ? p.data().t : "").join("");
+    const navs = Object.fromEntries((META.modulos || []).map(x => [x.id, x.nav]));
+    const esconder = todos.filter(id => !perm.includes(id)).map(id => navs[id]).filter(Boolean);
+    const inj = "<scr" + "ipt>(function(){var H=" + JSON.stringify(esconder) + ",P=" + JSON.stringify(perm) + ";" +
+      "function go(){H.forEach(function(n){var b=document.getElementById(n);if(b)b.style.display='none';});" +
+      "var a=document.querySelector('.nav-tab.active');var ok=a&&H.indexOf(a.id)<0;" +
+      "if(!ok&&typeof switchModule==='function'){try{switchModule(P[0]);}catch(e){console.warn(e);}}}" +
+      "if(document.readyState==='complete')go();else window.addEventListener('load',go);})();</scr" + "ipt>";
+    html = html.includes("</body>") ? html.replace(/<\/body>(?![\s\S]*<\/body>)/, inj + "</body>") : html + inj;
+    $("frame").srcdoc = html;
+    frameMsg("");
+  } catch (e) {
+    console.error(e);
+    frameMsg("Não foi possível carregar o Processador (" + esc(e.code || e.message) + ").");
+  }
+}
+
+// ── Painel Admin ────────────────────────────────────
+window.__wsAbrirAdmin = abrirAdmin;
+$("btnAdmin").onclick = () => abrirAdmin("usuarios");
+$("btnFecharAdmin").onclick = () => $("admin").classList.add("hidden");
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => abaAdmin(b.dataset.tab));
+function abaAdmin(t){
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["usuarios","versao","acessos"].forEach(s => $("tab-" + s).classList.toggle("hidden", s !== t));
+  if (t === "usuarios") carregarUsuarios();
+  if (t === "versao") mostrarVersao();
+  if (t === "acessos") carregarAcessos();
+}
+function abrirAdmin(t){ if (!ME?.admin) return; $("admin").classList.remove("hidden"); abaAdmin(t || "usuarios"); }
+
+function modulosDisponiveis(){ return META?.modulos || []; }
+function chipsHtml(sel, prefix){
+  const mods = modulosDisponiveis();
+  if (!mods.length) return '<span class="note">Publique uma versão do Processador para listar os módulos.</span>';
+  return mods.map(m => '<label class="chip' + (sel.includes(m.id) ? " on" : "") + '"><input type="checkbox" data-p="' + prefix + '" value="' + esc(m.id) + '"' + (sel.includes(m.id) ? " checked" : "") + '>' + esc(m.label) + '</label>').join("");
+}
+document.addEventListener("change", e => { if (e.target.matches(".chip input")) e.target.parentElement.classList.toggle("on", e.target.checked); });
+function lerChips(prefix){ return [...document.querySelectorAll('.chip input[data-p="' + prefix + '"]:checked')].map(i => i.value); }
+
+async function carregarUsuarios(){
+  $("nuMods").innerHTML = chipsHtml([], "nu");
+  $("userList").textContent = "Carregando...";
+  try {
+    const s = await getDocs(collection(db, "usuarios"));
+    USERS = s.docs.map(d => ({ email: d.id, ...d.data() })).sort((a, b) => a.email.localeCompare(b.email));
+    let h = '<table><thead><tr><th>Usuário</th><th>Situação</th><th>Módulos liberados</th><th></th></tr></thead><tbody>';
+    h += '<tr><td><b>' + esc(OWNER) + '</b><div class="note">Dono do sistema</div></td><td><span class="tag adm">Administrador</span></td><td class="note">Todos os módulos</td><td></td></tr>';
+    USERS.filter(u => u.email !== OWNER).forEach((u, i) => {
+      const p = "u" + i;
+      h += '<tr data-email="' + esc(u.email) + '" data-p="' + p + '"><td><b>' + esc(u.nome || "-") + '</b><div class="note">' + esc(u.email) + '</div>' +
+        '<div class="note" style="margin-top:6px"><label><input type="checkbox" class="fAtivo"' + (u.ativo ? " checked" : "") + '> Ativo</label> &nbsp; <label><input type="checkbox" class="fAdmin"' + (u.admin ? " checked" : "") + '> Administrador</label></div></td>' +
+        '<td>' + (u.ativo ? '<span class="tag ok">Ativo</span>' : '<span class="tag off">Bloqueado</span>') + (u.admin ? ' <span class="tag adm">Admin</span>' : "") + '</td>' +
+        '<td><div class="chips">' + chipsHtml(u.modulos || [], p) + '</div></td>' +
+        '<td style="white-space:nowrap"><button class="btn sm gold" data-act="salvar">Salvar</button> <button class="btn sm danger" data-act="remover">Remover</button></td></tr>';
+    });
+    h += "</tbody></table>";
+    if (!USERS.filter(u => u.email !== OWNER).length) h += '<p class="note" style="margin-top:10px">Nenhum outro usuário cadastrado.</p>';
+    $("userList").innerHTML = h;
+  } catch (e) { $("userList").textContent = "Erro ao carregar usuários: " + (e.code || e.message); }
+}
+$("userList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const tr = b.closest("tr"), email = tr.dataset.email, p = tr.dataset.p;
+  if (b.dataset.act === "salvar") {
+    try {
+      await setDoc(doc(db, "usuarios", email), { ativo: tr.querySelector(".fAtivo").checked, admin: tr.querySelector(".fAdmin").checked, modulos: lerChips(p), atualizadoEm: serverTimestamp(), atualizadoPor: ME.email }, { merge: true });
+      toast("Permissões de " + email + " salvas."); carregarUsuarios();
+    } catch (err) { toast("Erro ao salvar: " + (err.code || err.message), true); }
+  }
+  if (b.dataset.act === "remover") {
+    if (!confirm("Remover o acesso de " + email + "?")) return;
+    try { await deleteDoc(doc(db, "usuarios", email)); toast(email + " removido."); carregarUsuarios(); }
+    catch (err) { toast("Erro ao remover: " + (err.code || err.message), true); }
+  }
+});
+$("btnAddUser").onclick = async () => {
+  const email = $("nuEmail").value.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast("Informe um e-mail válido.", true); return; }
+  if (email === OWNER) { toast("Esse e-mail já é o dono do sistema.", true); return; }
+  try {
+    await setDoc(doc(db, "usuarios", email), { nome: $("nuNome").value.trim() || email, ativo: true, admin: false, modulos: lerChips("nu"), criadoEm: serverTimestamp(), criadoPor: ME.email });
+    $("nuEmail").value = ""; $("nuNome").value = "";
+    toast(email + " incluído."); carregarUsuarios();
+  } catch (err) { toast("Erro ao incluir: " + (err.code || err.message), true); }
+};
+
+// ── Publicar versão ─────────────────────────────────
+function mostrarVersao(){
+  $("verInfo").innerHTML = META
+    ? '<div>Versão</div><div>' + esc(META.versao || "-") + '</div><div>Arquivo</div><div>' + esc(META.arquivo || "-") + '</div><div>Publicada em</div><div>' + fmtData(META.publicadoEm) + ' por ' + esc(META.por || "-") + '</div><div>Tamanho</div><div>' + ((META.tamanho || 0) / 1024).toFixed(0) + ' KB em ' + META.partes + ' parte(s)</div><div>Módulos</div><div>' + (META.modulos || []).map(m => esc(m.label)).join(" · ") + '</div>'
+    : '<div>Situação</div><div>Nenhuma versão publicada</div>';
+}
+function extrairModulos(html){
+  const out = [], re = /<button\b[^>]*>[\s\S]*?<\/button>/g; let m;
+  while ((m = re.exec(html))) {
+    const tag = m[0];
+    const id = (tag.match(/\bid="(nav\w+)"/) || [])[1];
+    const mod = (tag.match(/switchModule\('(\w+)'\)/) || [])[1];
+    if (!id || !mod || out.some(x => x.id === mod)) continue;
+    const label = tag.replace(/^<button\b[^>]*>/, "").replace(/<\/button>$/, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    out.push({ id: mod, nav: id, label: label || mod });
+  }
+  return out;
+}
+function versaoDoNome(nome){
+  const m = nome.match(/(\d+)[_.](\d+)(?:[_.](\d+))?/); return m ? [m[1], m[2], m[3]].filter(Boolean).join(".") : "";
+}
+$("pubDrop").onclick = () => $("pubFile").click();
+["dragover","dragenter"].forEach(ev => $("pubDrop").addEventListener(ev, e => { e.preventDefault(); $("pubDrop").style.borderColor = "var(--gold)"; }));
+["dragleave","drop"].forEach(ev => $("pubDrop").addEventListener(ev, e => { e.preventDefault(); $("pubDrop").style.borderColor = ""; }));
+$("pubDrop").addEventListener("drop", e => { if (e.dataTransfer.files[0]) prepararPub(e.dataTransfer.files[0]); });
+$("pubFile").onchange = e => { if (e.target.files[0]) prepararPub(e.target.files[0]); e.target.value = ""; };
+async function prepararPub(file){
+  const html = await file.text();
+  const mods = extrairModulos(html);
+  if (!/switchModule/.test(html) || !mods.length) { $("pubPreview").innerHTML = '<span style="color:var(--danger)">Este arquivo não parece ser o Processador Fiscal (não encontrei as abas de módulos).</span>'; $("btnPublicar").classList.add("hidden"); PUB = null; return; }
+  PUB = { html, arquivo: file.name, versao: versaoDoNome(file.name), modulos: mods };
+  const novos = mods.filter(m => !(META?.modulos || []).some(x => x.id === m.id));
+  $("pubPreview").innerHTML = '<b>' + esc(file.name) + '</b> · ' + (html.length / 1024).toFixed(0) + ' KB · versão ' + esc(PUB.versao || "-") +
+    '<br>' + mods.length + ' módulos: ' + mods.map(m => esc(m.label)).join(" · ") +
+    (novos.length ? '<br><span style="color:var(--gold)">Novos módulos: ' + novos.map(m => esc(m.label)).join(", ") + ' (libere aos usuários na aba Usuários).</span>' : "");
+  $("btnPublicar").classList.remove("hidden");
+}
+$("btnPublicar").onclick = async () => {
+  if (!PUB) return;
+  const b = $("btnPublicar"); b.disabled = true; b.textContent = "Publicando...";
+  try {
+    const partes = [];
+    for (let i = 0; i < PUB.html.length; i += CHUNK) partes.push(PUB.html.slice(i, i + CHUNK));
+    const antigas = META?.partes || 0;
+    const batch = writeBatch(db);
+    partes.forEach((t, i) => batch.set(doc(db, "app", "parte_" + i), { t, i }));
+    for (let i = partes.length; i < antigas; i++) batch.delete(doc(db, "app", "parte_" + i));
+    batch.set(doc(db, "app", "meta"), { versao: PUB.versao, arquivo: PUB.arquivo, partes: partes.length, tamanho: PUB.html.length, modulos: PUB.modulos, publicadoEm: serverTimestamp(), por: ME.email });
+    await batch.commit();
+    toast("Versão " + (PUB.versao || PUB.arquivo) + " publicada.");
+    PUB = null; $("pubPreview").innerHTML = ""; b.classList.add("hidden");
+    await abrirProcessador(); mostrarVersao();
+  } catch (e) { toast("Erro ao publicar: " + (e.code || e.message), true); }
+  finally { b.disabled = false; b.textContent = "⬆ Publicar esta versão"; }
+};
+
+// ── Acessos ─────────────────────────────────────────
+async function carregarAcessos(){
+  $("logList").textContent = "Carregando...";
+  try {
+    const s = await getDocs(query(collection(db, "acessos"), orderBy("ts", "desc"), limit(100)));
+    if (s.empty) { $("logList").textContent = "Nenhum acesso registrado."; return; }
+    $("logList").innerHTML = '<table><thead><tr><th>Data</th><th>Usuário</th><th>Navegador</th></tr></thead><tbody>' +
+      s.docs.map(d => { const a = d.data(); return '<tr><td style="white-space:nowrap">' + fmtData(a.ts) + '</td><td><b>' + esc(a.nome || "") + '</b><div class="note">' + esc(a.email) + '</div></td><td class="note">' + esc((a.ua || "").slice(0, 90)) + '</td></tr>'; }).join("") +
+      '</tbody></table>';
+  } catch (e) { $("logList").textContent = "Erro ao carregar acessos: " + (e.code || e.message); }
+}
+</script>
+</body>
+</html>
